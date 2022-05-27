@@ -6,70 +6,137 @@ import styled from 'styled-components';
 
 import { API_URL } from './App';
 import TelaApp from './shared/TelaApp';
+import CriarHabito from './CriarHabito';
 
-function CriarHabito() {
+function DiaDaSemana({ index, dia, diasDoHabito }) {
+
+    const selecionarDiaDeHabito = () => diasDoHabito.some(diaHabito => diaHabito === index);
+    const diaDeHabito = selecionarDiaDeHabito();
+
+    return <Dia diaDeHabito={diaDeHabito}>{ dia }</Dia>;
+}
+
+function Habito({ id, nome, diasDoHabito, listaDeHabitos, setListaDeHabitos, dadosRespostaLogin }) {
 
     const montarDiasDaSemana = () => {
         const diasDaSemana = ["D", "S", "T", "Q", "Q", "S", "S"];
 
         return diasDaSemana.map((dia, index) =>
-            <Dia key={index}>
-                <span>{dia}</span>
-            </Dia>
+            <DiaDaSemana key={index} index={index} dia={dia} diasDoHabito={diasDoHabito}/>
         );
     };
 
-    const diasDaSemana = montarDiasDaSemana();
+    const novaListaDeHabitos = () => listaDeHabitos.filter(habito => habito.id !== id);
 
-    const montarCriarHabito = () => {
-        return (
-            <>
-                <Habito>
-                    <InfoHabito>
-                        <input
-                            placeholder="nome do hábito"
-                        />
-                        <DiasSemana>
-                            {diasDaSemana}
-                        </DiasSemana>
-                    </InfoHabito>
-                    <Botoes>
-                        <span>Cancelar</span>
-                        <Salvar>
-                            <span>Salvar</span>
-                        </Salvar>
-                    </Botoes>
-                </Habito>
-            </>
-        );
+    const deletarHabito = () => {
+
+        if(window.confirm(`Deseja realmente apagar o hábito: ${nome}?`)) {
+
+            const URL = `${API_URL}/habits/${id}`;
+
+            const config = {
+                headers: {
+                    "Authorization": `Bearer ${dadosRespostaLogin.token}`
+                }
+            };
+
+            axios
+                .delete(URL, config)
+                .then(() => {
+                    setListaDeHabitos(novaListaDeHabitos);
+                })
+                .catch(err => console.log(err));
+        }
     }
 
-    const criarHabito = montarCriarHabito();
+    const diasDaSemana = montarDiasDaSemana();
 
     return (
-        <>
-            {criarHabito}
-        </>
+        <ItemHabito>
+            <DeletarHabito onClick={deletarHabito}>
+                <ion-icon name="trash-outline"></ion-icon>
+            </DeletarHabito>
+            <span>{nome}</span>
+            <DiasDaSemana>
+                {diasDaSemana}
+            </DiasDaSemana>
+        </ItemHabito>
     );
 }
+
+function ListaDeHabitos({ listaDeHabitos, setListaDeHabitos, dadosRespostaLogin, renderizarLista }) {
+
+    const montarListaDeHabitos = () => {
+
+        if(listaDeHabitos.length !== 0) {
+
+            return listaDeHabitos.map((habito, index) =>
+                        <Habito key={index} id={habito.id} nome={habito.name}
+                            diasDoHabito={habito.days} listaDeHabitos={listaDeHabitos}
+                            setListaDeHabitos={setListaDeHabitos}
+                            dadosRespostaLogin={dadosRespostaLogin}
+                        />
+            );
+        } else if(listaDeHabitos.length === 0) {
+
+            return (
+                <SemHabitos>
+                    <span>Você não tem nenhum hábito cadastrado ainda. 
+                        Adicione um hábito para começar a trackear!</span>
+                </SemHabitos>
+            );
+        }
+    };
+
+    const listarHabitos = renderizarLista ? montarListaDeHabitos() : null;
+
+    return listarHabitos;
+}
+
 
 export default function Habitos() {
 
     const [listaDeHabitos, setListaDeHabitos] = useState([]);
-    const { verificarLocalStorage } = useContext(UserContext);
+    const [renderizarLista, setRenderizarLista] = useState(false);
+    const [toggle, setToggle] = useState(false);
+    const { dadosRespostaLogin, verificarLocalStorage } = useContext(UserContext);
 
     const irPara = useNavigate();
-
-    /*useEffect(() => {
-        const URL = `${API_URL}/habits`;
-        axios
-            .get()
-
-    }, []);*/
+    
 
     useEffect(() => {
         verificarLocalStorage(irPara, "/habitos");
+
+        let config;
+
+        if(dadosRespostaLogin.length) {
+            config = {
+                headers: {
+                    "Authorization": `Bearer ${dadosRespostaLogin.token}`
+                }
+            };
+        } else {
+            const dados = JSON.parse(localStorage.getItem("dadosUsuario"));
+
+            config = {
+                headers: {
+                    "Authorization": `Bearer ${dados.token}`
+                }
+            };
+        }
+
+        const URL = `${API_URL}/habits`;
+        axios
+            .get(URL, config)
+            .then(({ data }) => {
+                setListaDeHabitos(data);
+                setRenderizarLista(true);
+            })
+            .catch(err => console.log(err));
+
     }, []);
+    
+    const toggleCriarHabito = () => setToggle(!toggle);
 
     return (
         <>
@@ -77,11 +144,18 @@ export default function Habitos() {
                 <Container>
                     <MeusHabitos>
                         <span>Meus Hábitos</span>
-                        <AdicionarHabito>
+                        <AdicionarHabito disabled={toggle} onClick={toggleCriarHabito}>
                             <ion-icon name="add-sharp"></ion-icon>
                         </AdicionarHabito>
                     </MeusHabitos>
-                    <CriarHabito />
+                    <CriarHabito toggle={toggle} toggleCriarHabito={toggleCriarHabito}
+                        dadosRespostaLogin={dadosRespostaLogin} setListaDeHabitos={setListaDeHabitos}
+                    />
+                    <ListaDeHabitos listaDeHabitos={listaDeHabitos}
+                        setListaDeHabitos={setListaDeHabitos}
+                        dadosRespostaLogin={dadosRespostaLogin}
+                        renderizarLista={renderizarLista}
+                    />
                 </Container>
             </TelaApp>
         </>
@@ -108,15 +182,16 @@ const MeusHabitos = styled.div`
     margin-bottom: 10px;
 `
 
-const AdicionarHabito = styled.div`
+const AdicionarHabito = styled.button`
     width: 40px;
     height: 35px;    
-    display: flex;
+    display: flex;  
     justify-content: center;
     align-items: center;
     color: #FFFFFF;
     background: #52B6FF;
     border-radius: 5px;
+    border: none;
 
     ion-icon {
         --ionicon-stroke-width: 70px;
@@ -124,53 +199,27 @@ const AdicionarHabito = styled.div`
     }
 `
 
-const Habito = styled.div`
+const SemHabitos = styled.div`
+    font-size: 18px;
+    color: #666666;
+    margin-top: 20px;
+`
+
+const ItemHabito = styled.div`
+    position: relative;
     width: 100%;
-    height: 180px;
+    padding: 15px;
     box-sizing: border-box;
-    background: #FFFFFF;
     border-radius: 5px;
-    padding: 18px;
+    color: #666666;
     font-size: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    color: #DBDBDB;
+    gap: 8px;
+    background: #FFFFFF;
 `
 
-const InfoHabito = styled.div`
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-        input {
-            width: 100%;
-            height: 45px;
-            box-sizing: border-box;
-            background: #FFFFFF;
-            border: 1px solid #D5D5D5;
-            border-radius: 5px;
-            padding: 0 10px;
-            color: #666666;
-            font-size: 20px;
-        }
-
-        input:focus {
-            outline: 1px solid #52B6FF;
-        }
-
-        input::placeholder {
-            color: #DBDBDB;
-        }
-
-        input:disabled {
-            background: #D4D4D4;
-            color: #AFAFAF;
-        }
-`
-
-const DiasSemana = styled.div`
+const DiasDaSemana = styled.div`
     display: flex;
     gap: 4px;
 `
@@ -178,31 +227,23 @@ const DiasSemana = styled.div`
 const Dia = styled.div`
     width: 30px;
     height: 30px;
-    border: 1px solid #D5D5D5;
+    border: 1px solid ${({diaDeHabito}) => diaDeHabito ? "#CFCFCF" : "#D5D5D5"};
     border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 20px;
+    background: ${({diaDeHabito}) => diaDeHabito ? "#CFCFCF" : "#FFFFFF"};
+    color: ${({diaDeHabito}) => diaDeHabito ? "#FFFFFF" : "#DBDBDB"};
 `
 
-const Botoes = styled.div`
-    width: 100%;
-    height: 35px;
-    display: flex;
-    justify-content: end;
-    align-items: center;
-    gap: 25px;
-    color: #52B6FF;
-    font-size: 16px;
-`
+const DeletarHabito = styled.div`
+    position: absolute;
+    top: 10px;
+    right: 10px;
 
-const Salvar = styled.div`
-    width: 85px;
-    height: 100%;
-    color: #FFFFFF;
-    background: #52B6FF;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        ion-icon {
+            color: #666666;
+            font-size: 15px;
+        }
 `
