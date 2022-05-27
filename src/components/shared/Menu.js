@@ -48,9 +48,10 @@ const BarraMenu = styled.div`
     left: 0;
     bottom: 0;
     box-sizing: border-box;
-    
+
         span {
             color: #52B6FF;
+            font-size: 18px;
         }
 `
 

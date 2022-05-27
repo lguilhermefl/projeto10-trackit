@@ -9,7 +9,7 @@ export default function TelaApp({ children }) {
 
     return (
         <>
-            <Header fotoPerfil={dadosRespostaLogin.image} />
+            <Header fotoPerfil={dadosRespostaLogin.fotoPerfil} />
                 {children}
             <Menu />
         </>

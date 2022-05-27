@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { ThreeDots } from "react-loader-spinner";
 import { Link, useNavigate } from "react-router-dom";
 import styled from 'styled-components';
@@ -9,14 +9,19 @@ import logo from "../assets/img/logo.png"
 import { API_URL } from './App';
 
 export default function TelaInicial() {
+
     const [dadosLogin, setDadosLogin] = useState({
         email: "",
         password: ""
     }); 
     const [carregando, setCarregando] = useState(false);
-    const { setDadosRespostaLogin } = useContext(UserContext);
+    const { setDadosRespostaLogin, verificarLocalStorage } = useContext(UserContext);
 
     const irPara = useNavigate();
+
+    useEffect(() => {
+        verificarLocalStorage(irPara, "/hoje");
+    }, []);
 
     const montarFormularioLogin = () => {
         return (
@@ -44,6 +49,17 @@ export default function TelaInicial() {
         );
     };
 
+    const armazenarDadosLogin = data => {
+        const dados = {
+            fotoPerfil: data.image,
+            token: data.token
+        };
+        const dadosSerializados = JSON.stringify(dados);
+
+        localStorage.setItem("dadosUsuario", dadosSerializados);
+        setDadosRespostaLogin(dados);
+    };
+
     const entrar = e => {
         e.preventDefault();
 
@@ -55,8 +71,8 @@ export default function TelaInicial() {
         axios
             .post(URL, dados)
             .then(({ data }) => {
+                armazenarDadosLogin(data);
                 irPara("/hoje");
-                setDadosRespostaLogin(data);
             })
             .catch(() => {
                 alert("Houve um erro em seu Login, tente novamente por favor!");
@@ -82,6 +98,7 @@ export const Container = styled.div`
     flex-direction: column;
     align-items: center;
     background-color: #fff;
+    height: 100vh;
 
     img {
         margin-top: 70px;
@@ -109,6 +126,7 @@ export const Form = styled.form`
             border: 1px solid #D5D5D5;
             border-radius: 5px;
             padding: 0 10px;
+            color: #666666;
         }
 
         input:focus {
