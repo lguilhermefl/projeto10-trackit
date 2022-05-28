@@ -51,7 +51,7 @@ const GlobalStyle = createGlobalStyle`
     body {
         font-family: Lexend Deca, sans-serif;
         position: relative;
-        background: #EBEBEB;
+        background: #f3f3f3;
     }
 
     a {

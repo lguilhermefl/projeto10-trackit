@@ -13,6 +13,7 @@ import Historico from "./Historico"
 export default function App() {
 
     const [dadosRespostaLogin, setDadosRespostaLogin] = useState({});
+    const [porcentagemHabitosFeitosDoDia, setPorcentagemHabitosFeitosDoDia] = useState(0);
 
     const verificarLocalStorage = (redirecionar, local) => {
         const dadosSerializados = localStorage.getItem("dadosUsuario");
@@ -26,7 +27,13 @@ export default function App() {
         }
     }
 
-    const contextValue = { dadosRespostaLogin, setDadosRespostaLogin, verificarLocalStorage };
+    const contextValue = {
+        dadosRespostaLogin,
+        setDadosRespostaLogin,
+        verificarLocalStorage,
+        porcentagemHabitosFeitosDoDia,
+        setPorcentagemHabitosFeitosDoDia
+    };
 
     return (
         <BrowserRouter>

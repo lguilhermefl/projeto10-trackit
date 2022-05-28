@@ -3,7 +3,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Link } from 'react-router-dom'
 
-export default function Menu() {
+export default function Menu({ porcentagemHabitosFeitosDoDia }) {
 
     const estiloBarraProgresso = buildStyles({
         backgroundColor: "#52B6FF",
@@ -11,8 +11,6 @@ export default function Menu() {
         pathColor: "#fff",
         trailColor: "transparent"
     });
-
-    const percentage = 66;
 
     return (
         <BarraMenu>
@@ -22,7 +20,7 @@ export default function Menu() {
             <Link to="/hoje">
                 <Progresso>
                     <CircularProgressbar
-                        value={percentage}
+                        value={porcentagemHabitosFeitosDoDia}
                         text={`Hoje`}
                         background
                         backgroundPadding={6}
