@@ -89,7 +89,6 @@ function ListaDeHabitos({ listaDeHabitos, setListaDeHabitos, dadosRespostaLogin,
     };
 
     const listarHabitos = renderizarLista ? montarListaDeHabitos() : null;
-
     return listarHabitos;
 }
 

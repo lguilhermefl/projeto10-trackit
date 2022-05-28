@@ -109,7 +109,11 @@ function ListaHabitosDeHoje({ habitosDeHoje, setHabitosDeHoje, token,
         const totalDeHabitos = habitosDeHoje.length;
         const totalDeHabitosFeitos = habitosDeHoje.filter(habito => habito.done).length;
         const porcentagem = Math.round((totalDeHabitosFeitos/totalDeHabitos) * 100);
-        return porcentagem;
+        if(habitosDeHoje.length === 0) {
+            return 0;
+        } else {
+            return porcentagem;
+        }
     };
     
     const porcentagemHabitosFeitos = calcularPorcentagemDeHabitosFeitos();
