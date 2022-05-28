@@ -5,13 +5,13 @@ import Header from './Header';
 import Menu from './Menu';
 
 export default function TelaApp({ children }) {
-    const { dadosRespostaLogin, porcentagemHabitosFeitosDoDia } = useContext(UserContext);
+    const { dadosRespostaLogin } = useContext(UserContext);
 
     return (
         <>
             <Header fotoPerfil={dadosRespostaLogin.fotoPerfil} />
                 {children}
-            <Menu porcentagemHabitosFeitosDoDia={porcentagemHabitosFeitosDoDia} />
+            <Menu />
         </>
     );
 }

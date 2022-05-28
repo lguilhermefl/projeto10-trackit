@@ -19,7 +19,8 @@ dayjs.updateLocale('pt-br', {
     ]
   });
 
-function HabitoDeHoje({ id, nome, feito, sequenciaAtual, maiorSequencia, token, setHabitosDeHoje }) {
+function HabitoDeHoje({ id, nome, feito, sequenciaAtual, maiorSequencia, token,
+    setListaDeHabitosDoDia }) {
 
     const [carregando, setCarregando] = useState(false);
 
@@ -33,7 +34,7 @@ function HabitoDeHoje({ id, nome, feito, sequenciaAtual, maiorSequencia, token, 
         axios
             .get(URL, config)
             .then(({ data }) => {
-                setHabitosDeHoje(data);
+                setListaDeHabitosDoDia(data);
             });
     } 
 
@@ -84,7 +85,11 @@ function HabitoDeHoje({ id, nome, feito, sequenciaAtual, maiorSequencia, token, 
                 <InfoSequenciaHabito>
                     <div>
                         <span>Sequência atual: </span>
-                        <Atual feito={feito}>{sequenciaAtual} dias</Atual>
+                        <Atual feito={feito} sequenciaAtual={sequenciaAtual}
+                            maiorSequencia={maiorSequencia}
+                        >
+                            {sequenciaAtual} dias
+                        </Atual>
                     </div>
                     <div>
                         <span>Seu recorde: </span>
@@ -102,33 +107,15 @@ function HabitoDeHoje({ id, nome, feito, sequenciaAtual, maiorSequencia, token, 
     );
 }
 
-function ListaHabitosDeHoje({ habitosDeHoje, setHabitosDeHoje, token,
-    setPorcentagemHabitosFeitosDoDia }) {
-    
-    const calcularPorcentagemDeHabitosFeitos = () => {
-        const totalDeHabitos = habitosDeHoje.length;
-        const totalDeHabitosFeitos = habitosDeHoje.filter(habito => habito.done).length;
-        const porcentagem = Math.round((totalDeHabitosFeitos/totalDeHabitos) * 100);
-        if(habitosDeHoje.length === 0) {
-            return 0;
-        } else {
-            return porcentagem;
-        }
-    };
-    
-    const porcentagemHabitosFeitos = calcularPorcentagemDeHabitosFeitos();
-    
-    useEffect(() => {
-        setPorcentagemHabitosFeitosDoDia(porcentagemHabitosFeitos);
-    }, [porcentagemHabitosFeitos]);
+function ListaHabitosDeHoje({ listaDeHabitosDoDia, setListaDeHabitosDoDia, token }) {
 
     const montarListaHabitosDeHoje = () => {
 
-        return habitosDeHoje.map(habito => 
+        return listaDeHabitosDoDia.map(habito => 
             <HabitoDeHoje key={habito.id} id={habito.id} nome={habito.name}
                 feito={habito.done} sequenciaAtual={habito.currentSequence}
                 maiorSequencia={habito.highestSequence} token={token}
-                setHabitosDeHoje={setHabitosDeHoje}
+                setListaDeHabitosDoDia={setListaDeHabitosDoDia}
             />
         );
     }
@@ -141,12 +128,12 @@ function ListaHabitosDeHoje({ habitosDeHoje, setHabitosDeHoje, token,
 
 export default function Hoje() {
 
-    const [habitosDeHoje, setHabitosDeHoje] = useState([]);
     const { 
         dadosRespostaLogin,
         verificarLocalStorage,
-        porcentagemHabitosFeitosDoDia,
-        setPorcentagemHabitosFeitosDoDia 
+        listaDeHabitosDoDia,
+        setListaDeHabitosDoDia,
+        porcentagemHabitosFeitosDoDia
     } = useContext(UserContext);
 
     const irPara = useNavigate();
@@ -179,7 +166,7 @@ export default function Hoje() {
         axios
             .get(URL, config)
             .then(({ data }) => {
-                setHabitosDeHoje(data);
+                setListaDeHabitosDoDia(data);
             })
             .catch(err => {
                 console.log(err);
@@ -202,9 +189,10 @@ export default function Hoje() {
                 <HabitosConcluidos porcentagemHabitosFeitosDoDia={porcentagemHabitosFeitosDoDia}>
                     {mensagemHabitosConcluidos}
                 </HabitosConcluidos>
-                <ListaHabitosDeHoje habitosDeHoje={habitosDeHoje} token={dadosRespostaLogin.token}
-                    setHabitosDeHoje={setHabitosDeHoje}
-                    setPorcentagemHabitosFeitosDoDia={setPorcentagemHabitosFeitosDoDia}
+                <ListaHabitosDeHoje 
+                    listaDeHabitosDoDia={listaDeHabitosDoDia}
+                    token={dadosRespostaLogin.token}
+                    setListaDeHabitosDoDia={setListaDeHabitosDoDia}
                 />
             </Container>
         </TelaApp>
@@ -216,6 +204,14 @@ const corMensagemHabitosConcluidos = porcentagemHabitosFeitosDoDia => {
         return "#BABABA";
     } else {
         return "#8FC549"
+    }
+};
+
+const corSequenciaAtual = (feito, sequenciaAtual, maiorSequencia) => {
+    if((sequenciaAtual === maiorSequencia && sequenciaAtual !== 0) || feito) {
+        return "#8FC549";
+    } else {
+        return "#666666";
     }
 };
 
@@ -289,9 +285,11 @@ const InfoSequenciaHabito = styled.div`
 `
 
 const Atual = styled.span`
-    color: ${({feito}) => feito ? "#8FC549" : "#666666"};
+    color: ${({feito, sequenciaAtual, maiorSequencia}) => 
+        corSequenciaAtual(feito, sequenciaAtual, maiorSequencia)};
 `
 
 const Maior = styled.span`
-    color: ${({sequenciaAtual, maiorSequencia}) => corMaiorSequencia(sequenciaAtual, maiorSequencia)};
+    color: ${({sequenciaAtual, maiorSequencia}) => 
+        corMaiorSequencia(sequenciaAtual, maiorSequencia)};
 `

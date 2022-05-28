@@ -13,6 +13,7 @@ import Historico from "./Historico"
 export default function App() {
 
     const [dadosRespostaLogin, setDadosRespostaLogin] = useState({});
+    const [listaDeHabitosDoDia, setListaDeHabitosDoDia] = useState([]);
     const [porcentagemHabitosFeitosDoDia, setPorcentagemHabitosFeitosDoDia] = useState(0);
 
     const verificarLocalStorage = (redirecionar, local) => {
@@ -31,6 +32,8 @@ export default function App() {
         dadosRespostaLogin,
         setDadosRespostaLogin,
         verificarLocalStorage,
+        listaDeHabitosDoDia,
+        setListaDeHabitosDoDia,
         porcentagemHabitosFeitosDoDia,
         setPorcentagemHabitosFeitosDoDia
     };

@@ -1,6 +1,13 @@
+import { useContext } from 'react';
+import UserContext from "../contexts/UserContext";
 import styled from 'styled-components';
 
-export default function Header({ fotoPerfil }) {
+export default function Header() {
+
+    const { dadosRespostaLogin } = useContext(UserContext);
+
+    const fotoPerfil = dadosRespostaLogin.fotoPerfil;
+    
     return (
         <Topo>
             <h1>TrackIt</h1>

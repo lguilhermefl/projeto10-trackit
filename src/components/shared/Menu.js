@@ -2,8 +2,15 @@ import styled from 'styled-components';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Link } from 'react-router-dom'
+import { useContext, useEffect } from 'react';
+import UserContext from "../contexts/UserContext";
 
-export default function Menu({ porcentagemHabitosFeitosDoDia }) {
+export default function Menu() {
+
+    const {
+        listaDeHabitosDoDia,
+        setPorcentagemHabitosFeitosDoDia
+    } = useContext(UserContext);
 
     const estiloBarraProgresso = buildStyles({
         backgroundColor: "#52B6FF",
@@ -11,6 +18,23 @@ export default function Menu({ porcentagemHabitosFeitosDoDia }) {
         pathColor: "#fff",
         trailColor: "transparent"
     });
+
+    const calcularPorcentagemDeHabitosFeitos = () => {
+        const totalDeHabitos = listaDeHabitosDoDia.length;
+        const totalDeHabitosFeitos = listaDeHabitosDoDia.filter(habito => habito.done).length;
+        const porcentagem = Math.round((totalDeHabitosFeitos/totalDeHabitos) * 100);
+        if(listaDeHabitosDoDia.length === 0) {
+            return 0;
+        } else {
+            return porcentagem;
+        }
+    };
+    
+    const porcentagemHabitosFeitos = calcularPorcentagemDeHabitosFeitos();
+
+    useEffect(() => {
+        setPorcentagemHabitosFeitosDoDia(porcentagemHabitosFeitos);
+    }, [listaDeHabitosDoDia]);
 
     return (
         <BarraMenu>
@@ -20,7 +44,7 @@ export default function Menu({ porcentagemHabitosFeitosDoDia }) {
             <Link to="/hoje">
                 <Progresso>
                     <CircularProgressbar
-                        value={porcentagemHabitosFeitosDoDia}
+                        value={porcentagemHabitosFeitos}
                         text={`Hoje`}
                         background
                         backgroundPadding={6}
