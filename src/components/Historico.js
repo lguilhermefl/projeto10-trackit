@@ -74,7 +74,9 @@ export default function Historico() {
         <TelaApp>
             <Container>
                 <Titulo>Histórico</Titulo>
-                <Calendar calendarType="US" formatDay={dia} />
+                <CalendarioBox>
+                    <Calendar calendarType="US" formatDay={dia} />
+                </CalendarioBox>
             </Container>
         </TelaApp>
     );
@@ -99,6 +101,17 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
+`
+
+const Titulo = styled.span`
+    color: #126BA5;
+    font-size: 23px;
+    margin-top: 5px;
+`
+
+const CalendarioBox = styled.div`
+    display: flex;
+    justify-content: center;
 
         .react-calendar {
             border: none;
@@ -111,12 +124,6 @@ const Container = styled.div`
             display: flex;
             justify-content: center;
         }
-`
-
-const Titulo = styled.span`
-    color: #126BA5;
-    font-size: 23px;
-    margin-top: 5px;
 `
 
 const Dia = styled.div`
