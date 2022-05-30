@@ -4,11 +4,16 @@ import 'react-circular-progressbar/dist/styles.css';
 import { Link } from 'react-router-dom'
 import { useContext, useEffect } from 'react';
 import UserContext from "../contexts/UserContext";
+import axios from 'axios';
+
+import { API_URL } from '../App';
 
 export default function Menu() {
 
     const {
+        dadosRespostaLogin,
         listaDeHabitosDoDia,
+        setListaDeHabitosDoDia,
         setPorcentagemHabitosFeitosDoDia
     } = useContext(UserContext);
 
@@ -31,6 +36,34 @@ export default function Menu() {
     };
     
     const porcentagemHabitosFeitos = calcularPorcentagemDeHabitosFeitos();
+
+    useEffect(() => {
+        let config;
+
+        if(dadosRespostaLogin.length) {
+            config = {
+                headers: {
+                    "Authorization": `Bearer ${dadosRespostaLogin.token}`
+                }
+            };
+        } else {
+            const dados = JSON.parse(localStorage.getItem("dadosUsuario"));
+
+            config = {
+                headers: {
+                    "Authorization": `Bearer ${dados.token}`
+                }
+            };
+        }
+
+        const URL = `${API_URL}/habits/today`;
+
+        axios
+            .get(URL, config)
+            .then(({ data }) => {
+                setListaDeHabitosDoDia(data);
+            });
+    },[]);
 
     useEffect(() => {
         setPorcentagemHabitosFeitosDoDia(porcentagemHabitosFeitos);
